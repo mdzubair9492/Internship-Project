@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ employee.full_name }} - Employee Details</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .employee-id {
+            font-size: 1.2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .detail-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .salary-box {
+            padding: 30px;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .salary-box.null {
+            background: linear-gradient(135deg, #ee0979, #ff6a00);
+        }
+        
+        .salary-box .label {
+            font-size: 1em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .salary-box .value {
+            font-size: 3em;
+            font-weight: bold;
+        }
+        
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .skill-badge {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .badge.active { background: #38ef7d; color: white; }
+        .badge.inactive { background: #ff6a00; color: white; }
+        .badge.on_leave { background: #ffc107; color: white; }
+        .badge.male { background: #667eea; color: white; }
+        .badge.female { background: #ee0979; color: white; }
+        .badge.other { background: #6c757d; color: white; }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+        }
+        
+        .messages {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <div>
+                <h1>{{ employee.full_name }}</h1>
+                <div class="employee-id">{{ employee.employee_id }}</div>
+            </div>
+            <div>
+                <span class="badge {{ employee.status }}">{{ employee.get_status_display }}</span>
+            </div>
+        </div>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Salary Section -->
+        {% if employee.salary %}
+        <div class="salary-box">
+            <div class="label">Annual Salary</div>
+            <div class="value">${{ employee.salary|floatformat:2 }}</div>
+        </div>
+        {% else %}
+        <div class="salary-box null">
+            <div class="label">Salary Not Predicted</div>
+            <div class="value">Pending ML Prediction</div>
+        </div>
+        <a href="{% url 'predict_salary' employee.employee_id %}" class="btn btn-success">
+            🤖 Predict Salary Now
+        </a>
+        {% endif %}
+        
+        <!-- Personal Information -->
+        <div class="section">
+            <div class="section-title">👤 Personal Information</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Username</div>
+                    <div class="detail-value">{{ employee.username }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">{{ employee.email }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Phone</div>
+                    <div class="detail-value">{{ employee.phone|default:"Not provided" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Gender</div>
+                    <div class="detail-value">
+                        <span class="badge {{ employee.gender }}">{{ employee.get_gender_display }}</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Date of Birth</div>
+                    <div class="detail-value">{{ employee.date_of_birth|date:"F d, Y" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Age</div>
+                    <div class="detail-value">{{ employee.date_of_birth|timesince }} old</div>
+                </div>
+                <div class="detail-item" style="grid-column: span 2;">
+                    <div class="detail-label">Address</div>
+                    <div class="detail-value">{{ employee.address|default:"Not provided" }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Employment Information -->
+        <div class="section">
+            <div class="section-title">💼 Employment Information</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Role</div>
+                    <div class="detail-value">{{ employee.get_role_display }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Department</div>
+                    <div class="detail-value">{{ employee.department }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Department ID</div>
+                    <div class="detail-value">{{ employee.department_id }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Designation</div>
+                    <div class="detail-value">{{ employee.designation }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Designation ID</div>
+                    <div class="detail-value">{{ employee.designation_id }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Position</div>
+                    <div class="detail-value">{{ employee.position }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Grade</div>
+                    <div class="detail-value">Grade {{ employee.grade }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Hire Date</div>
+                    <div class="detail-value">{{ employee.hire_date|date:"F d, Y" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Tenure</div>
+                    <div class="detail-value">{{ employee.hire_date|timesince }} with company</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Skills -->
+        <div class="section">
+            <div class="section-title">🎯 Skills</div>
+            <div class="skills-list">
+                {% for skill in skills_list %}
+                <span class="skill-badge">Skill {{ skill }}</span>
+                {% empty %}
+                <p style="color: #999;">No skills listed</p>
+                {% endfor %}
+            </div>
+            <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                <div class="detail-label">Skills Data (Raw)</div>
+                <div class="detail-value" style="font-size: 0.9em; color: #666;">{{ employee.skills }}</div>
+            </div>
+        </div>
+        
+        <!-- System Information -->
+        <div class="section">
+            <div class="section-title">⚙️ System Information</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Record Created</div>
+                    <div class="detail-value">{{ employee.created_at|date:"F d, Y H:i" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Last Updated</div>
+                    <div class="detail-value">{{ employee.updated_at|date:"F d, Y H:i" }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee;">
+            <a href="{% url 'employee_list' %}" class="btn btn-secondary">← Back to List</a>
+            <a href="/admin/office_app/employee/{{ employee.id }}/change/" class="btn btn-primary">✏️ Edit Employee</a>
+            {% if not employee.salary %}
+            <a href="{% url 'predict_salary' employee.employee_id %}" class="btn btn-success">🤖 Predict Salary</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
